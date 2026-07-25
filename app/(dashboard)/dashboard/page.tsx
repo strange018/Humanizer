@@ -75,7 +75,7 @@ export default async function DashboardPage() {
       });
 
       const words = rewrites.reduce((sum, r) => sum + r.wordCount, 0);
-      
+
       // Calculate average score for the day
       // Fallback to 85% for older records without score values
       const scoredRewrites = rewrites.map((r) => r.rewrittenHumanScore !== null ? r.rewrittenHumanScore : 85);
@@ -222,8 +222,8 @@ export default async function DashboardPage() {
                         ""
                       );
 
-                      const areaD = points.length > 0 
-                        ? `${pathD} L 100 100 L 0 100 Z` 
+                      const areaD = points.length > 0
+                        ? `${pathD} L 100 100 L 0 100 Z`
                         : "";
 
                       return (
@@ -265,11 +265,11 @@ export default async function DashboardPage() {
                                 strokeWidth="2.5"
                                 className="hover:scale-[1.6] transition-transform duration-200"
                               />
-                              <foreignObject 
-                                x={p.x - 15} 
-                                y={p.y - 25} 
-                                width="30" 
-                                height="20" 
+                              <foreignObject
+                                x={p.x - 15}
+                                y={p.y - 25}
+                                width="30"
+                                height="20"
                                 className="overflow-visible opacity-0 group-hover/marker:opacity-100 transition-opacity pointer-events-none z-10"
                               >
                                 <div className="bg-neutral-950 text-neutral-100 border border-neutral-800 text-[8px] py-0.5 px-1 rounded shadow text-center whitespace-nowrap font-bold">

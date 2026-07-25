@@ -113,8 +113,8 @@ export default async function DashboardPage() {
                 </div>
               ) : (
                 <div className="space-y-3 flex-1 justify-center flex flex-col">
-                  {modeStats.map((stat) => {
-                    const modeDetail = REWRITE_MODES[stat.mode] || { label: stat.mode, emoji: "✍️" };
+                  {modeStats.map((stat: any) => {
+                    const modeDetail = REWRITE_MODES[stat.mode as RewriteMode] || { label: stat.mode, emoji: "✍️" };
                     const percentage = totalRewrites > 0 ? (stat.count / totalRewrites) * 100 : 0;
 
                     return (

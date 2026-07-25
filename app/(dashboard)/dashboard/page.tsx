@@ -180,7 +180,7 @@ export default async function DashboardPage() {
               </div>
             ) : (
               <div className="divide-y divide-border/60">
-                {recentRewrites.map((rewrite) => {
+                {recentRewrites.map((rewrite: any) => {
                   const modeDetail = REWRITE_MODES[rewrite.mode as RewriteMode] || {
                     label: rewrite.mode,
                     emoji: "✍️",

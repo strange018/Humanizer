@@ -1,0 +1,171 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 250 84% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 250 84% 60%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
+    --card: 224 71% 6%;
+    --card-foreground: 213 31% 91%;
+    --popover: 224 71% 6%;
+    --popover-foreground: 213 31% 91%;
+    --primary: 250 84% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 222 47% 11%;
+    --secondary-foreground: 213 31% 91%;
+    --muted: 223 47% 11%;
+    --muted-foreground: 215 16% 57%;
+    --accent: 223 47% 11%;
+    --accent-foreground: 213 31% 91%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 213 31% 91%;
+    --border: 216 34% 17%;
+    --input: 216 34% 17%;
+    --ring: 250 84% 65%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, hsl(250, 84%, 65%), hsl(280, 75%, 65%), hsl(320, 70%, 60%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow effect */
+.glow {
+  box-shadow: 0 0 40px hsl(250 84% 65% / 0.15);
+}
+
+/* Glass card */
+.glass {
+  background: hsl(var(--card) / 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid hsl(var(--border) / 0.6);
+}
+
+/* Streaming cursor */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.cursor-blink::after {
+  content: "▋";
+  animation: blink 1s step-start infinite;
+  color: hsl(var(--primary));
+  margin-left: 1px;
+}
+
+/* Subtle gradient background */
+.hero-gradient {
+  background: radial-gradient(
+    ellipse 80% 50% at 50% -20%,
+    hsl(250 84% 65% / 0.12),
+    transparent
+  );
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Fade in up */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--muted-foreground) / 0.1) 50%,
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% auto;
+  animation: shimmer 1.5s linear infinite;
+}
+
+/* Ad placeholder styling */
+.ad-placeholder {
+  background: repeating-linear-gradient(
+    45deg,
+    hsl(var(--muted)),
+    hsl(var(--muted)) 10px,
+    hsl(var(--muted-foreground) / 0.05) 10px,
+    hsl(var(--muted-foreground) / 0.05) 20px
+  );
+  border: 2px dashed hsl(var(--border));
+  border-radius: var(--radius);
+}

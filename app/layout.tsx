@@ -1,0 +1,32 @@
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { Providers } from "@/components/shared/Providers";
+import { Navbar } from "@/components/shared/Navbar";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+export const metadata: Metadata = {
+  title: "Humanize AI - Free Natural Writing Assistant",
+  description: "Rewrite AI-generated text to sound completely natural, fluent, and human-like. High performance, side-by-side comparison, supporting multiple writing styles.",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" suppressHydrationWarning className={`${inter.variable}`}>
+      <body className="flex flex-col min-h-screen bg-background text-foreground antialiased selection:bg-primary/20">
+        <Providers>
+          <Navbar />
+          <main className="flex-1 w-full">{children}</main>
+        </Providers>
+      </body>
+    </html>
+  );
+}

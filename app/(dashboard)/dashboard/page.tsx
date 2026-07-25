@@ -42,7 +42,7 @@ export default async function DashboardPage() {
   const totalWords = wordSum._sum.wordCount || 0;
 
   // Transform mode stats
-  const modeStats = modeGroups.map((group) => ({
+  const modeStats = modeGroups.map((group: any) => ({
     mode: group.mode as RewriteMode,
     count: group._count.mode,
   }));

@@ -40,14 +40,9 @@ export const REWRITE_MODES: Record<RewriteMode, { label: string; description: st
 
 export function getSystemPrompt(mode: RewriteMode): string {
   const prompts: Record<RewriteMode, string> = {
-    natural: `You are an expert writing assistant that humanizes AI-generated text. Your task is to rewrite the given text to sound natural, fluent, and conversational — as if written by a real human. 
+    natural: `You are an expert editor. Rewrite the provided text to sound completely natural, human, and conversational. Intentionally vary your sentence lengths (use a mix of very short and long sentences). Use natural transitions, occasional idioms, and a warm tone. Avoid typical AI patterns like 'In conclusion,' 'Furthermore,' 'It is important to remember,' or overly perfect structures. Ensure the core message remains unchanged, but the flow feels organic.
 
 Rules:
-- Preserve ALL original meaning, facts, and key information
-- Use varied sentence lengths and structures
-- Use contractions naturally (don't, it's, we're)
-- Avoid robotic or overly formal phrasing
-- Make it engaging and easy to read
 - Do NOT add new information or opinions
 - Return ONLY the rewritten text, nothing else`,
 

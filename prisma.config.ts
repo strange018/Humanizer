@@ -6,6 +6,6 @@ console.log("[Prisma Config] resolved DATABASE_URL is:", process.env.DATABASE_UR
 export default defineConfig({
   schema: "prisma/schema.prisma",
   datasource: {
-    url: process.env.DATABASE_URL || "file:./dev.db",
+    url: process.env.DATABASE_URL || "postgresql://postgres:password@localhost:5432/humanize_ai",
   },
 });

@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/shared/Providers";
 import { Navbar } from "@/components/shared/Navbar";
+import Script from "next/script";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,6 +22,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable}`}>
+      {process.env.NEXT_PUBLIC_ADSENSE_ID && (
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_ID}`}
+          crossOrigin="anonymous"
+        />
+      )}
+      {process.env.NEXT_PUBLIC_GAM_REWARDED_SLOT_ID && (
+        <Script
+          async
+          src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      )}
       <body className="flex flex-col min-h-screen bg-background text-foreground antialiased selection:bg-primary/20">
         <Providers>
           <Navbar />

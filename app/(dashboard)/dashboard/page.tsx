@@ -5,7 +5,7 @@ import { AdBanner } from "@/components/ads/AdBanner";
 import { AdSidebar } from "@/components/ads/AdSidebar";
 import { REWRITE_MODES, type RewriteMode } from "@/lib/openai";
 import { formatDate } from "@/lib/utils";
-import { BarChart3, FileText, Sparkles, Clock, ArrowRight } from "lucide-react";
+import { BarChart3, FileText, Sparkles, Clock, ArrowRight, TrendingUp } from "lucide-react";
 import Link from "next/link";
 
 export const revalidate = 0; // Disable server caching to ensure stats stay up-to-date
@@ -46,6 +46,62 @@ export default async function DashboardPage() {
     mode: group.mode as RewriteMode,
     count: group._count.mode,
   }));
+
+  // Fetch usage stats over the last 7 days (including today)
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }).reverse(); // chronological: oldest to newest
+
+  const chartData = await Promise.all(
+    days.map(async (dayStart) => {
+      const dayEnd = new Date(dayStart);
+      dayEnd.setDate(dayStart.getDate() + 1);
+
+      const rewrites = await prisma.rewrite.findMany({
+        where: {
+          userId: session.user.id,
+          createdAt: {
+            gte: dayStart,
+            lt: dayEnd,
+          },
+        },
+        select: {
+          wordCount: true,
+          rewrittenHumanScore: true,
+        },
+      });
+
+      const words = rewrites.reduce((sum, r) => sum + r.wordCount, 0);
+      
+      // Calculate average score for the day
+      // Fallback to 85% for older records without score values
+      const scoredRewrites = rewrites.map((r) => r.rewrittenHumanScore !== null ? r.rewrittenHumanScore : 85);
+      const avgScore = scoredRewrites.length > 0
+        ? Math.round(scoredRewrites.reduce((sum, score) => sum + score, 0) / scoredRewrites.length)
+        : 0;
+
+      const dayLabel = dayStart.toLocaleDateString("en-US", { weekday: "short" });
+
+      return {
+        label: dayLabel,
+        wordCount: words,
+        humanScore: avgScore,
+      };
+    })
+  );
+
+  // Find the average overall human score across all user records
+  const allUserRewrites = await prisma.rewrite.findMany({
+    where: { userId: session.user.id },
+    select: { rewrittenHumanScore: true },
+  });
+  const allScores = allUserRewrites.map((r) => r.rewrittenHumanScore !== null ? r.rewrittenHumanScore : 85);
+  const avgOverallScore = allScores.length > 0
+    ? Math.round(allScores.reduce((sum, s) => sum + s, 0) / allScores.length)
+    : 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -92,13 +148,149 @@ export default async function DashboardPage() {
 
             <div className="p-6 rounded-2xl border border-border/80 bg-card/60 glow flex items-center gap-4">
               <div className="p-3.5 rounded-xl bg-primary/10 text-primary">
-                <BarChart3 className="h-5 w-5" />
+                <TrendingUp className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Writing Efficiency
+                  Avg. Human Score
                 </p>
-                <h3 className="text-2xl font-bold text-foreground mt-0.5">Active</h3>
+                <h3 className="text-2xl font-bold text-foreground mt-0.5">
+                  {avgOverallScore > 0 ? `${avgOverallScore}%` : "N/A"}
+                </h3>
+              </div>
+            </div>
+          </div>
+
+          {/* Analytics Charts Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Word Count Bar Chart */}
+            <div className="p-6 rounded-2xl border border-border bg-card/40 flex flex-col justify-between space-y-4">
+              <div>
+                <h3 className="font-semibold text-base text-foreground">Usage History</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Words humanized over the last 7 days</p>
+              </div>
+              <div className="h-44 w-full flex items-end justify-between pt-4 px-2">
+                {chartData.map((d, i) => {
+                  const maxWords = Math.max(...chartData.map((x) => x.wordCount), 500);
+                  const barHeight = maxWords > 0 ? (d.wordCount / maxWords) * 100 : 0;
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center group relative h-full justify-end">
+                      {/* Tooltip */}
+                      <div className="absolute bottom-full mb-1.5 opacity-0 group-hover:opacity-100 bg-neutral-950 text-neutral-100 text-[10px] py-1 px-2 rounded pointer-events-none transition-opacity duration-200 shadow-md whitespace-nowrap z-10 border border-neutral-800">
+                        {d.wordCount.toLocaleString()} words
+                      </div>
+                      {/* Bar */}
+                      <div
+                        className="w-[50%] sm:w-[40%] bg-gradient-to-t from-primary/60 to-primary rounded-t hover:from-primary hover:to-violet-400 transition-all duration-500 shadow-sm"
+                        style={{ height: `${Math.max(4, barHeight)}%` }}
+                      />
+                      {/* Label */}
+                      <span className="text-[10px] font-semibold text-muted-foreground mt-2 block">{d.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* AI Bypass Success Trend (Line Chart) */}
+            <div className="p-6 rounded-2xl border border-border bg-card/40 flex flex-col justify-between space-y-4">
+              <div>
+                <h3 className="font-semibold text-base text-foreground">Bypass Success Trend</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Average human score over the last 7 days</p>
+              </div>
+              <div className="h-44 w-full relative pt-4 flex flex-col justify-between">
+                <div className="flex-1 w-full relative">
+                  {/* SVG Line Graph */}
+                  <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    {/* Grid Lines */}
+                    <line x1="0" y1="20" x2="100" y2="20" stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3" />
+                    <line x1="0" y1="50" x2="100" y2="50" stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3" />
+                    <line x1="0" y1="80" x2="100" y2="80" stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3" />
+
+                    {/* Draw Smooth Line */}
+                    {(() => {
+                      const points = chartData.map((d, i) => {
+                        const x = (i / 6) * 100;
+                        // Score 0-100 translates to y height (0 is top, 100 is bottom)
+                        // Adjust visual boundaries slightly to fit markers inside SVG boundaries
+                        const y = 90 - ((d.humanScore || 0) * 0.8);
+                        return { x, y, score: d.humanScore };
+                      });
+
+                      const pathD = points.reduce(
+                        (acc, p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `${acc} L ${p.x} ${p.y}`),
+                        ""
+                      );
+
+                      const areaD = points.length > 0 
+                        ? `${pathD} L 100 100 L 0 100 Z` 
+                        : "";
+
+                      return (
+                        <>
+                          {/* Area under line */}
+                          {areaD && (
+                            <path
+                              d={areaD}
+                              fill="url(#area-gradient-dashboard)"
+                              opacity="0.08"
+                            />
+                          )}
+                          {/* Main Line path */}
+                          <path
+                            d={pathD}
+                            fill="none"
+                            stroke="var(--primary)"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="transition-all duration-1000"
+                          />
+                          {/* Definition for Gradients */}
+                          <defs>
+                            <linearGradient id="area-gradient-dashboard" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="var(--primary)" />
+                              <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
+                            </linearGradient>
+                          </defs>
+                          {/* Hoverable Data Points */}
+                          {points.map((p, i) => (
+                            <g key={i} className="group/marker cursor-pointer">
+                              <circle
+                                cx={p.x}
+                                cy={p.y}
+                                r="4"
+                                fill="var(--background)"
+                                stroke="var(--primary)"
+                                strokeWidth="2.5"
+                                className="hover:scale-[1.6] transition-transform duration-200"
+                              />
+                              <foreignObject 
+                                x={p.x - 15} 
+                                y={p.y - 25} 
+                                width="30" 
+                                height="20" 
+                                className="overflow-visible opacity-0 group-hover/marker:opacity-100 transition-opacity pointer-events-none z-10"
+                              >
+                                <div className="bg-neutral-950 text-neutral-100 border border-neutral-800 text-[8px] py-0.5 px-1 rounded shadow text-center whitespace-nowrap font-bold">
+                                  {p.score > 0 ? `${p.score}%` : "0%"}
+                                </div>
+                              </foreignObject>
+                            </g>
+                          ))}
+                        </>
+                      );
+                    })()}
+                  </svg>
+                </div>
+                {/* Labels */}
+                <div className="flex justify-between w-full pt-2 border-t border-border/40 px-1">
+                  {chartData.map((d, i) => (
+                    <span key={i} className="text-[10px] font-semibold text-muted-foreground">
+                      {d.label}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

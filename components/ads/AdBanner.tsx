@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 interface AdBannerProps {
   slot?: string;
@@ -11,30 +11,75 @@ export function AdBanner({ slot, className }: AdBannerProps) {
   const [adBlocked, setAdBlocked] = useState(false);
   const adsenseId = process.env.NEXT_PUBLIC_ADSENSE_ID;
 
+  // Resolve numeric slot ID from env variables if configured
+  let resolvedSlot = slot;
+  if (adsenseId) {
+    if (slot === "dashboard-top" || slot === "history-top") {
+      resolvedSlot = process.env.NEXT_PUBLIC_ADSENSE_BANNER_TOP_SLOT || slot;
+    } else if (slot === "dashboard-bottom" || slot === "history-bottom") {
+      resolvedSlot = process.env.NEXT_PUBLIC_ADSENSE_BANNER_BOTTOM_SLOT || slot;
+    } else {
+      resolvedSlot = process.env.NEXT_PUBLIC_ADSENSE_DEFAULT_SLOT || slot || "default-slot";
+    }
+  }
+
+  const insRef = useRef<HTMLModElement>(null);
+
   useEffect(() => {
-    // Check if real AdSense is configured and attempt to load it
-    if (adsenseId) {
-      try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (e) {
-        console.error("AdSense load error", e);
-        setAdBlocked(true);
-      }
+    if (adsenseId && insRef.current) {
+      const checkAndPush = () => {
+        if (insRef.current && insRef.current.offsetWidth >= 250) {
+          try {
+            // @ts-ignore
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+            return true; // Pushed successfully
+          } catch (e) {
+            console.error("AdSense load error", e);
+            setAdBlocked(true);
+          }
+        }
+        return false;
+      };
+
+      // Try immediately
+      const success = checkAndPush();
+      if (success) return;
+
+      // If not visible/rendered yet, wait using ResizeObserver
+      const observer = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.contentRect.width >= 250) {
+            const ok = checkAndPush();
+            if (ok) {
+              observer.disconnect();
+            }
+          }
+        }
+      });
+
+      observer.observe(insRef.current);
+      return () => observer.disconnect();
     }
   }, [adsenseId]);
 
   // If AdSense is configured, render the standard Google Ads code
   if (adsenseId) {
+    const isDev = process.env.NODE_ENV === "development";
     return (
-      <div className={`my-4 flex justify-center overflow-hidden ${className}`}>
+      <div className={`my-4 flex justify-center overflow-hidden w-full max-w-4xl mx-auto h-[50px] sm:h-[90px] relative ${isDev ? "border border-dashed border-border/80 bg-muted/20 rounded-xl" : ""} ${className || ""}`}>
+        {isDev && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-[10px] font-semibold text-muted-foreground select-none">
+            Google AdSense Banner Slot (Live on approved domain)
+          </div>
+        )}
         <ins
-          className="adsbygoogle"
+          ref={insRef}
+          className="adsbygoogle w-full h-[50px] sm:h-[90px]"
           style={{ display: "block" }}
           data-ad-client={adsenseId}
-          data-ad-slot={slot || "default-slot"}
-          data-ad-format="auto"
-          data-full-width-responsive="true"
+          data-ad-slot={resolvedSlot}
+          data-ad-format="horizontal"
+          data-full-width-responsive="false"
         />
       </div>
     );

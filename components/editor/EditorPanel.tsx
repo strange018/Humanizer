@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ModeSelector } from "./ModeSelector";
 import { FileUpload } from "./FileUpload";
 import { countWords, countChars, downloadTextFile } from "@/lib/utils";
@@ -25,6 +25,130 @@ export function EditorPanel() {
   const [isAdPlaying, setIsAdPlaying] = useState(false);
   const [isAdCompleted, setIsAdCompleted] = useState(false);
   const [rewardedWords, setRewardedWords] = useState(0);
+
+  // Google Publisher Tag (GPT) Rewarded Ad Integration
+  const rewardedSlotRef = useRef<any>(null);
+  const [isGptAdReady, setIsGptAdReady] = useState(false);
+  const gamRewardedSlotId = process.env.NEXT_PUBLIC_GAM_REWARDED_SLOT_ID;
+
+  useEffect(() => {
+    if (!gamRewardedSlotId) return;
+
+    const anyWindow = window as any;
+    anyWindow.googletag = anyWindow.googletag || { cmd: [] };
+
+    anyWindow.googletag.cmd.push(() => {
+      const slot = anyWindow.googletag.defineOutOfPageSlot(
+        gamRewardedSlotId,
+        anyWindow.googletag.enums.OutOfPageFormat.REWARDED
+      );
+
+      if (slot) {
+        slot.addService(anyWindow.googletag.pubads());
+        rewardedSlotRef.current = slot;
+
+        anyWindow.googletag.pubads().addEventListener("RewardedSlotReadyEvent", (event: any) => {
+          if (event.slot === slot) {
+            setIsGptAdReady(true);
+          }
+        });
+
+        anyWindow.googletag.pubads().addEventListener("RewardedSlotGrantedEvent", (event: any) => {
+          if (event.slot === slot) {
+            setRewardedWords((prev) => prev + 1000);
+            setIsAdPlaying(false);
+            setIsAdCompleted(true);
+            setShowAdModal(true);
+          }
+        });
+
+        anyWindow.googletag.pubads().addEventListener("RewardedSlotClosedEvent", (event: any) => {
+          if (event.slot === slot) {
+            setIsGptAdReady(false);
+            anyWindow.googletag.pubads().refresh([slot]);
+          }
+        });
+
+        anyWindow.googletag.enableServices();
+      }
+    });
+
+    return () => {
+      if (rewardedSlotRef.current) {
+        anyWindow.googletag.cmd.push(() => {
+          anyWindow.googletag.destroySlots([rewardedSlotRef.current]);
+        });
+      }
+    };
+  }, [gamRewardedSlotId]);
+
+  const handleWatchAd = () => {
+    const anyWindow = window as any;
+    if (isGptAdReady && rewardedSlotRef.current && anyWindow.googletag) {
+      anyWindow.googletag.cmd.push(() => {
+        anyWindow.googletag.display(rewardedSlotRef.current);
+      });
+    } else {
+      // Fallback to mock ad
+      setAdCountdown(5);
+      setIsAdPlaying(true);
+      setIsAdCompleted(false);
+      setShowAdModal(true);
+    }
+  };
+
+  // AI Detector scanner states
+  const [originalScore, setOriginalScore] = useState<number | null>(null);
+  const [originalScanning, setOriginalScanning] = useState(false);
+  const [rewrittenScore, setRewrittenScore] = useState<number | null>(null);
+  const [rewrittenScanning, setRewrittenScanning] = useState(false);
+
+  const handleScanText = async (type: "original" | "rewritten") => {
+    const textToScan = type === "original" ? inputText : rewrittenText;
+    if (!textToScan.trim()) return;
+
+    if (type === "original") {
+      setOriginalScanning(true);
+      setOriginalScore(null);
+    } else {
+      setRewrittenScanning(true);
+      setRewrittenScore(null);
+    }
+
+    try {
+      const response = await fetch("/api/detector", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: textToScan }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to scan text");
+      }
+
+      const data = await response.json();
+      if (type === "original") {
+        setOriginalScore(data.humanScore);
+      } else {
+        setRewrittenScore(data.humanScore);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("AI Detector scan failed. Please try again.");
+    } finally {
+      if (type === "original") {
+        setOriginalScanning(false);
+      } else {
+        setRewrittenScanning(false);
+      }
+    }
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-emerald-500 bg-emerald-500/10 border-emerald-500/20";
+    if (score >= 50) return "text-amber-500 bg-amber-500/10 border-amber-500/20";
+    return "text-rose-500 bg-rose-500/10 border-rose-500/20";
+  };
 
   // Paragraph selection for targeted rewrites
   const [paragraphs, setParagraphs] = useState<string[]>([]);
@@ -62,6 +186,7 @@ export function EditorPanel() {
     setError(null);
     if (paragraphIndex === null) {
       setRewrittenText("");
+      setRewrittenScore(null); // Reset score for new rewritten text
     }
 
     try {
@@ -206,12 +331,36 @@ export function EditorPanel() {
           {inputText && (
             <div className="px-4 py-3 border-t bg-muted/20 flex justify-between items-center">
               <button
-                onClick={() => setInputText("")}
+                onClick={() => {
+                  setInputText("");
+                  setOriginalScore(null);
+                  setRewrittenScore(null);
+                }}
                 className="text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer"
                 disabled={isLoading}
               >
                 <RotateCcw className="h-3 w-3" /> Clear
               </button>
+
+              <div className="flex items-center gap-2">
+                {originalScanning ? (
+                  <span className="text-xs text-muted-foreground flex items-center gap-1.5 font-semibold">
+                    <span className="h-3 w-3 border-2 border-primary border-t-transparent animate-spin rounded-full inline-block" />
+                    Scanning...
+                  </span>
+                ) : originalScore !== null ? (
+                  <div className={`px-2.5 py-1 rounded-lg border text-xs font-bold ${getScoreColor(originalScore)}`}>
+                    🛡️ {originalScore}% Human
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleScanText("original")}
+                    className="px-2.5 py-1 rounded-lg border text-xs font-semibold bg-card text-muted-foreground hover:text-foreground border-border hover:bg-muted/80 cursor-pointer transition-all flex items-center gap-1"
+                  >
+                    🔍 Check AI Score
+                  </button>
+                )}
+              </div>
               <button
                 onClick={() => handleRewrite()}
                 disabled={isLoading || !inputText.trim()}
@@ -322,12 +471,7 @@ export function EditorPanel() {
                     🚀 Go Premium
                   </button>
                   <button
-                    onClick={() => {
-                      setAdCountdown(5);
-                      setIsAdPlaying(true);
-                      setIsAdCompleted(false);
-                      setShowAdModal(true);
-                    }}
+                    onClick={handleWatchAd}
                     className="px-3.5 py-1.5 text-xs font-semibold bg-secondary hover:bg-secondary/80 text-foreground rounded-lg border border-border cursor-pointer transition-all flex items-center gap-1 hover:scale-[1.02]"
                   >
                     📺 Watch Sponsor Ad
@@ -343,6 +487,7 @@ export function EditorPanel() {
                 onClick={() => {
                   setRewrittenText("");
                   setSelectedParagraphIndex(null);
+                  setRewrittenScore(null);
                 }}
                 className="text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer"
                 disabled={isLoading}
@@ -350,6 +495,24 @@ export function EditorPanel() {
                 <RotateCcw className="h-3 w-3" /> Reset
               </button>
               <div className="flex items-center gap-2">
+                {rewrittenScanning ? (
+                  <span className="text-xs text-muted-foreground flex items-center gap-1.5 font-semibold">
+                    <span className="h-3 w-3 border-2 border-primary border-t-transparent animate-spin rounded-full inline-block" />
+                    Scanning...
+                  </span>
+                ) : rewrittenScore !== null ? (
+                  <div className={`px-2.5 py-1.5 rounded-lg border text-xs font-bold ${getScoreColor(rewrittenScore)}`}>
+                    🛡️ {rewrittenScore}% Human
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleScanText("rewritten")}
+                    className="px-2.5 py-1.5 rounded-lg border text-xs font-semibold bg-card text-muted-foreground hover:text-foreground border-border hover:bg-muted/80 cursor-pointer transition-all flex items-center gap-1 mr-1"
+                  >
+                    🔍 Check AI Score
+                  </button>
+                )}
+                
                 <button
                   onClick={handleCopy}
                   className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all border cursor-pointer flex items-center gap-1 text-xs font-semibold"

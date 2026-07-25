@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { openai, MODEL, getSystemPrompt, type RewriteMode } from "@/lib/openai";
 import { prisma } from "@/lib/prisma";
-import { countWords, countChars, generateTitle } from "@/lib/utils";
+import { countWords, countChars, generateTitle, calculateHumanScore } from "@/lib/utils";
 
 export const maxDuration = 60;
 
@@ -66,6 +66,8 @@ export async function POST(req: NextRequest) {
                 wordCount: countWords(fullText),
                 charCount: countChars(fullText),
                 title: generateTitle(text),
+                originalHumanScore: calculateHumanScore(text),
+                rewrittenHumanScore: calculateHumanScore(fullText),
               },
             });
           }

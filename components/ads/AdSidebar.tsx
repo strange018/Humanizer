@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface AdSidebarProps {
   slot?: string;
@@ -10,26 +10,71 @@ interface AdSidebarProps {
 export function AdSidebar({ slot, className }: AdSidebarProps) {
   const adsenseId = process.env.NEXT_PUBLIC_ADSENSE_ID;
 
+  // Resolve numeric slot ID from env variables if configured
+  let resolvedSlot = slot;
+  if (adsenseId) {
+    if (slot === "dashboard-sidebar" || slot === "history-sidebar") {
+      resolvedSlot = process.env.NEXT_PUBLIC_ADSENSE_SIDEBAR_SLOT || slot;
+    } else {
+      resolvedSlot = process.env.NEXT_PUBLIC_ADSENSE_DEFAULT_SLOT || slot || "sidebar-slot";
+    }
+  }
+
+  const insRef = useRef<HTMLModElement>(null);
+
   useEffect(() => {
-    if (adsenseId) {
-      try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (e) {
-        console.error("AdSense load error", e);
-      }
+    if (adsenseId && insRef.current) {
+      const checkAndPush = () => {
+        if (insRef.current && insRef.current.offsetWidth >= 250) {
+          try {
+            // @ts-ignore
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+            return true; // Pushed successfully
+          } catch (e) {
+            console.error("AdSense load error", e);
+          }
+        }
+        return false;
+      };
+
+      // Try immediately
+      const success = checkAndPush();
+      if (success) return;
+
+      // If not visible/rendered yet, wait using ResizeObserver
+      const observer = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.contentRect.width >= 250) {
+            const ok = checkAndPush();
+            if (ok) {
+              observer.disconnect();
+            }
+          }
+        }
+      });
+
+      observer.observe(insRef.current);
+      return () => observer.disconnect();
     }
   }, [adsenseId]);
 
   if (adsenseId) {
+    const isDev = process.env.NODE_ENV === "development";
     return (
-      <div className={`flex flex-col items-center justify-center border-l bg-card p-4 min-h-[600px] w-[300px] shrink-0 ${className}`}>
+      <div className={`flex flex-col items-center justify-center border-l bg-card p-4 min-h-[600px] w-[300px] shrink-0 relative ${isDev ? "border-2 border-dashed border-border" : ""} ${className || ""}`}>
+        {isDev && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-xs font-semibold text-muted-foreground text-center p-4 select-none">
+            <span className="mb-2">Google AdSense Sidebar Slot</span>
+            <span className="text-[10px] text-muted-foreground/60">(Live only on approved domain)</span>
+          </div>
+        )}
         <span className="text-[10px] font-bold text-muted-foreground uppercase mb-2">Advertisement</span>
         <ins
+          ref={insRef}
           className="adsbygoogle"
-          style={{ display: "block" }}
+          style={{ display: "block", width: "100%" }}
           data-ad-client={adsenseId}
-          data-ad-slot={slot || "sidebar-slot"}
+          data-ad-slot={resolvedSlot}
           data-ad-format="vertical"
           data-full-width-responsive="true"
         />

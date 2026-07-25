@@ -24,14 +24,20 @@ export function AdBanner({ slot, className }: AdBannerProps) {
   }
 
   const insRef = useRef<HTMLModElement>(null);
+  const initializedRef = useRef(false);
 
   useEffect(() => {
     if (adsenseId && insRef.current) {
       const checkAndPush = () => {
         if (insRef.current && insRef.current.offsetWidth >= 250) {
+          // Prevent multiple pushes on the same element
+          if (initializedRef.current || insRef.current.hasAttribute("data-adsbygoogle-status")) {
+            return true;
+          }
           try {
             // @ts-ignore
             (window.adsbygoogle = window.adsbygoogle || []).push({});
+            initializedRef.current = true;
             return true; // Pushed successfully
           } catch (e) {
             console.error("AdSense load error", e);

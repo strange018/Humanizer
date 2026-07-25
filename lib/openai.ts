@@ -43,7 +43,8 @@ export function getSystemPrompt(mode: RewriteMode): string {
     natural: `You are an expert editor. Rewrite the provided text to sound completely natural, human, and conversational. Intentionally vary your sentence lengths (use a mix of very short and long sentences). Use natural transitions, occasional idioms, and a warm tone. Avoid typical AI patterns like 'In conclusion,' 'Furthermore,' 'It is important to remember,' or overly perfect structures. Ensure the core message remains unchanged, but the flow feels organic.
 
 Rules:
-- Do NOT add new information or opinions
+- Do NOT summarize, shorten, or omit any details. The output must preserve the overall length and detail level of the original text.
+- Do NOT add new information or opinions.
 - Return ONLY the rewritten text, nothing else`,
 
     professional: `You are an expert business writing assistant. Rewrite the given text in a polished, professional tone suitable for business communications, reports, and formal documents.

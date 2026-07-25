@@ -28,6 +28,7 @@ export function EditorPanel() {
 
   // Google Publisher Tag (GPT) Rewarded Ad Integration
   const rewardedSlotRef = useRef<any>(null);
+  const rewardedEventRef = useRef<any>(null);
   const [isGptAdReady, setIsGptAdReady] = useState(false);
   const gamRewardedSlotId = process.env.NEXT_PUBLIC_GAM_REWARDED_SLOT_ID;
 
@@ -47,13 +48,14 @@ export function EditorPanel() {
         slot.addService(anyWindow.googletag.pubads());
         rewardedSlotRef.current = slot;
 
-        anyWindow.googletag.pubads().addEventListener("RewardedSlotReadyEvent", (event: any) => {
+        anyWindow.googletag.pubads().addEventListener("rewardedSlotReady", (event: any) => {
           if (event.slot === slot) {
+            rewardedEventRef.current = event;
             setIsGptAdReady(true);
           }
         });
 
-        anyWindow.googletag.pubads().addEventListener("RewardedSlotGrantedEvent", (event: any) => {
+        anyWindow.googletag.pubads().addEventListener("rewardedSlotGranted", (event: any) => {
           if (event.slot === slot) {
             setRewardedWords((prev) => prev + 1000);
             setIsAdPlaying(false);
@@ -62,14 +64,16 @@ export function EditorPanel() {
           }
         });
 
-        anyWindow.googletag.pubads().addEventListener("RewardedSlotClosedEvent", (event: any) => {
+        anyWindow.googletag.pubads().addEventListener("rewardedSlotClosed", (event: any) => {
           if (event.slot === slot) {
             setIsGptAdReady(false);
+            rewardedEventRef.current = null;
             anyWindow.googletag.pubads().refresh([slot]);
           }
         });
 
         anyWindow.googletag.enableServices();
+        anyWindow.googletag.display(slot);
       }
     });
 
@@ -83,13 +87,10 @@ export function EditorPanel() {
   }, [gamRewardedSlotId]);
 
   const handleWatchAd = () => {
-    const anyWindow = window as any;
-    if (isGptAdReady && rewardedSlotRef.current && anyWindow.googletag) {
-      anyWindow.googletag.cmd.push(() => {
-        anyWindow.googletag.display(rewardedSlotRef.current);
-      });
+    if (isGptAdReady && rewardedEventRef.current) {
+      rewardedEventRef.current.makeRewardedVisible();
     } else {
-      // Fallback to mock ad
+      // Fallback to mock ad if ad block is active or not loaded yet
       setAdCountdown(5);
       setIsAdPlaying(true);
       setIsAdCompleted(false);

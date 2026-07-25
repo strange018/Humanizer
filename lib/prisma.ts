@@ -9,21 +9,18 @@ const globalForPrisma = globalThis as unknown as {
 
 let prismaInstance: PrismaClient;
 
-if (process.env.NODE_ENV === "production") {
-  console.log("[Prisma Init] Production mode detected");
-  const pool = new pg.Pool({
-    connectionString: process.env.DATABASE_URL,
-  });
-  const adapter = new PrismaPg(pool);
-  prismaInstance = new PrismaClient({ adapter });
-} else {
-  if (!globalForPrisma.prisma) {
-    const dbUrl = process.env.DATABASE_URL || "file:./dev.db";
-    console.log("[Prisma Init] Dev mode. dbUrl is:", dbUrl);
-    const isSqlite = dbUrl.startsWith("file:") || !dbUrl;
+const dbUrl = process.env.DATABASE_URL || "file:./dev.db";
+const isSqlite = dbUrl.startsWith("file:") || !dbUrl;
 
-    if (isSqlite) {
-      console.log("[Prisma Init] Initializing LibSQL adapter factory with URL:", dbUrl);
+if (isSqlite) {
+  if (process.env.NODE_ENV === "production") {
+    const adapter = new PrismaLibSql({
+      url: dbUrl,
+    });
+    prismaInstance = new PrismaClient({ adapter });
+  } else {
+    if (!globalForPrisma.prisma) {
+      console.log("[Prisma Init] Dev mode. Initializing LibSQL adapter factory with SQLite URL:", dbUrl);
       const adapter = new PrismaLibSql({
         url: dbUrl,
       });
@@ -31,8 +28,19 @@ if (process.env.NODE_ENV === "production") {
         adapter,
         log: ["query", "error", "warn"],
       });
-    } else {
-      console.log("[Prisma Init] Initializing Postgres pool with URL:", dbUrl);
+    }
+    prismaInstance = globalForPrisma.prisma;
+  }
+} else {
+  if (process.env.NODE_ENV === "production") {
+    const pool = new pg.Pool({
+      connectionString: dbUrl,
+    });
+    const adapter = new PrismaPg(pool);
+    prismaInstance = new PrismaClient({ adapter });
+  } else {
+    if (!globalForPrisma.prisma) {
+      console.log("[Prisma Init] Dev mode. Initializing Postgres pool with URL:", dbUrl);
       const pool = new pg.Pool({
         connectionString: dbUrl,
       });
@@ -42,8 +50,8 @@ if (process.env.NODE_ENV === "production") {
         log: ["query", "error", "warn"],
       });
     }
+    prismaInstance = globalForPrisma.prisma;
   }
-  prismaInstance = globalForPrisma.prisma;
 }
 
 export const prisma = prismaInstance;

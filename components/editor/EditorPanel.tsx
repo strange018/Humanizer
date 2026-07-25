@@ -329,42 +329,45 @@ export function EditorPanel() {
           </div>
 
           {inputText && (
-            <div className="px-4 py-3 border-t bg-muted/20 flex justify-between items-center">
-              <button
-                onClick={() => {
-                  setInputText("");
-                  setOriginalScore(null);
-                  setRewrittenScore(null);
-                }}
-                className="text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer"
-                disabled={isLoading}
-              >
-                <RotateCcw className="h-3 w-3" /> Clear
-              </button>
+            <div className="px-4 py-3 border-t bg-muted/20 flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center">
+              <div className="flex items-center justify-between sm:justify-start gap-4 order-2 sm:order-1 w-full sm:w-auto">
+                <button
+                  onClick={() => {
+                    setInputText("");
+                    setOriginalScore(null);
+                    setRewrittenScore(null);
+                  }}
+                  className="text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer"
+                  disabled={isLoading}
+                >
+                  <RotateCcw className="h-3 w-3" /> Clear
+                </button>
 
-              <div className="flex items-center gap-2">
-                {originalScanning ? (
-                  <span className="text-xs text-muted-foreground flex items-center gap-1.5 font-semibold">
-                    <span className="h-3 w-3 border-2 border-primary border-t-transparent animate-spin rounded-full inline-block" />
-                    Scanning...
-                  </span>
-                ) : originalScore !== null ? (
-                  <div className={`px-2.5 py-1 rounded-lg border text-xs font-bold ${getScoreColor(originalScore)}`}>
-                    🛡️ {originalScore}% Human
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => handleScanText("original")}
-                    className="px-2.5 py-1 rounded-lg border text-xs font-semibold bg-card text-muted-foreground hover:text-foreground border-border hover:bg-muted/80 cursor-pointer transition-all flex items-center gap-1"
-                  >
-                    🔍 Check AI Score
-                  </button>
-                )}
+                <div className="flex items-center gap-2">
+                  {originalScanning ? (
+                    <span className="text-xs text-muted-foreground flex items-center gap-1.5 font-semibold">
+                      <span className="h-3 w-3 border-2 border-primary border-t-transparent animate-spin rounded-full inline-block" />
+                      Scanning...
+                    </span>
+                  ) : originalScore !== null ? (
+                    <div className={`px-2.5 py-1 rounded-lg border text-xs font-bold ${getScoreColor(originalScore)}`}>
+                      🛡️ {originalScore}% Human
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handleScanText("original")}
+                      className="px-2.5 py-1 rounded-lg border text-xs font-semibold bg-card text-muted-foreground hover:text-foreground border-border hover:bg-muted/80 cursor-pointer transition-all flex items-center gap-1"
+                    >
+                      🔍 Check AI Score
+                    </button>
+                  )}
+                </div>
               </div>
+
               <button
                 onClick={() => handleRewrite()}
                 disabled={isLoading || !inputText.trim()}
-                className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary/95 disabled:bg-primary/50 text-primary-foreground font-semibold text-xs rounded-lg shadow-sm shadow-primary/20 cursor-pointer disabled:cursor-not-allowed transition-all scale-100 hover:scale-[1.02] active:scale-95"
+                className="flex items-center justify-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary/95 disabled:bg-primary/50 text-primary-foreground font-semibold text-xs rounded-lg shadow-sm shadow-primary/20 cursor-pointer disabled:cursor-not-allowed transition-all scale-100 hover:scale-[1.02] active:scale-95 w-full sm:w-auto order-1 sm:order-2"
               >
                 {isLoading ? (
                   <span className="flex items-center gap-1">
@@ -413,8 +416,8 @@ export function EditorPanel() {
 
             {compareMode && rewrittenText ? (
               // Side by side Comparison view
-              <div className="grid grid-cols-2 gap-4 h-full">
-                <div className="border-r pr-4 space-y-4 overflow-y-auto max-h-[420px] text-sm text-muted-foreground leading-relaxed">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
+                <div className="border-b pb-4 md:border-b-0 md:pb-0 md:border-r md:pr-4 space-y-4 overflow-y-auto max-h-[420px] text-sm text-muted-foreground leading-relaxed">
                   {paragraphs.map((p, i) => (
                     <div
                       key={i}
@@ -428,7 +431,7 @@ export function EditorPanel() {
                     </div>
                   ))}
                 </div>
-                <div className="pl-2 space-y-4 overflow-y-auto max-h-[420px] text-sm text-foreground leading-relaxed">
+                <div className="md:pl-2 space-y-4 overflow-y-auto max-h-[420px] text-sm text-foreground leading-relaxed font-medium">
                   {rewrittenText.split(/\n\s*\n/).map((p, i) => (
                     <div key={i} className="p-2.5 rounded-lg bg-primary/5 border border-primary/10">
                       {p}
@@ -482,40 +485,44 @@ export function EditorPanel() {
           </div>
 
           {rewrittenText && (
-            <div className="px-4 py-3 border-t bg-muted/20 flex justify-between items-center">
-              <button
-                onClick={() => {
-                  setRewrittenText("");
-                  setSelectedParagraphIndex(null);
-                  setRewrittenScore(null);
-                }}
-                className="text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer"
-                disabled={isLoading}
-              >
-                <RotateCcw className="h-3 w-3" /> Reset
-              </button>
-              <div className="flex items-center gap-2">
-                {rewrittenScanning ? (
-                  <span className="text-xs text-muted-foreground flex items-center gap-1.5 font-semibold">
-                    <span className="h-3 w-3 border-2 border-primary border-t-transparent animate-spin rounded-full inline-block" />
-                    Scanning...
-                  </span>
-                ) : rewrittenScore !== null ? (
-                  <div className={`px-2.5 py-1.5 rounded-lg border text-xs font-bold ${getScoreColor(rewrittenScore)}`}>
-                    🛡️ {rewrittenScore}% Human
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => handleScanText("rewritten")}
-                    className="px-2.5 py-1.5 rounded-lg border text-xs font-semibold bg-card text-muted-foreground hover:text-foreground border-border hover:bg-muted/80 cursor-pointer transition-all flex items-center gap-1 mr-1"
-                  >
-                    🔍 Check AI Score
-                  </button>
-                )}
-                
+            <div className="px-4 py-3 border-t bg-muted/20 flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center">
+              <div className="flex items-center justify-between sm:justify-start gap-4 order-2 sm:order-1 w-full sm:w-auto">
+                <button
+                  onClick={() => {
+                    setRewrittenText("");
+                    setSelectedParagraphIndex(null);
+                    setRewrittenScore(null);
+                  }}
+                  className="text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer"
+                  disabled={isLoading}
+                >
+                  <RotateCcw className="h-3 w-3" /> Reset
+                </button>
+                <div className="flex items-center gap-2">
+                  {rewrittenScanning ? (
+                    <span className="text-xs text-muted-foreground flex items-center gap-1.5 font-semibold">
+                      <span className="h-3 w-3 border-2 border-primary border-t-transparent animate-spin rounded-full inline-block" />
+                      Scanning...
+                    </span>
+                  ) : rewrittenScore !== null ? (
+                    <div className={`px-2.5 py-1.5 rounded-lg border text-xs font-bold ${getScoreColor(rewrittenScore)}`}>
+                      🛡️ {rewrittenScore}% Human
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handleScanText("rewritten")}
+                      className="px-2.5 py-1.5 rounded-lg border text-xs font-semibold bg-card text-muted-foreground hover:text-foreground border-border hover:bg-muted/80 cursor-pointer transition-all flex items-center gap-1"
+                    >
+                      🔍 Check AI Score
+                    </button>
+                  )}
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2 order-1 sm:order-2 w-full sm:w-auto justify-end">
                 <button
                   onClick={handleCopy}
-                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all border cursor-pointer flex items-center gap-1 text-xs font-semibold"
+                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all border cursor-pointer flex items-center justify-center gap-1 text-xs font-semibold flex-1 sm:flex-none"
                   title="Copy Text"
                 >
                   {isCopied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
@@ -523,7 +530,7 @@ export function EditorPanel() {
                 </button>
                 <button
                   onClick={handleDownload}
-                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all border cursor-pointer flex items-center gap-1 text-xs font-semibold"
+                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all border cursor-pointer flex items-center justify-center gap-1 text-xs font-semibold flex-1 sm:flex-none"
                   title="Download File"
                 >
                   <Download className="h-3.5 w-3.5" />
@@ -623,7 +630,7 @@ export function EditorPanel() {
       {/* Rewarded Video Ad Modal */}
       {showAdModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fade-in">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden relative flex flex-col aspect-video animate-scale-in">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden relative flex flex-col min-h-[340px] md:aspect-video animate-scale-in">
             {/* Header / Info bar */}
             <div className="bg-black/50 border-b border-neutral-800 px-4 py-3 flex items-center justify-between text-neutral-200">
               <span className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 text-neutral-400">

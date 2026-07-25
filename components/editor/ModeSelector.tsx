@@ -11,7 +11,7 @@ interface ModeSelectorProps {
 
 export function ModeSelector({ activeMode, onChange, disabled }: ModeSelectorProps) {
   return (
-    <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+    <div className="flex overflow-x-auto sm:flex-wrap gap-2 max-w-full pb-2 sm:pb-0 justify-start [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {(Object.keys(REWRITE_MODES) as RewriteMode[]).map((modeKey) => {
         const mode = REWRITE_MODES[modeKey];
         const isActive = activeMode === modeKey;
@@ -23,7 +23,7 @@ export function ModeSelector({ activeMode, onChange, disabled }: ModeSelectorPro
             disabled={disabled}
             onClick={() => onChange(modeKey)}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border transition-all cursor-pointer select-none",
+              "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border transition-all cursor-pointer select-none shrink-0",
               isActive
                 ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20 scale-[1.02]"
                 : "bg-card text-foreground hover:bg-accent border-border hover:border-muted-foreground/30",

@@ -67,7 +67,7 @@ export function AdSidebar({ slot, className }: AdSidebarProps) {
   if (adsenseId) {
     const isDev = process.env.NODE_ENV === "development";
     return (
-      <div className={`flex flex-col items-center justify-center border-l bg-card p-4 min-h-[600px] w-[300px] shrink-0 relative ${isDev ? "border-2 border-dashed border-border" : ""} ${className || ""}`}>
+      <div className={`hidden lg:flex flex-col items-center justify-center border-l bg-card p-4 min-h-[600px] w-[300px] shrink-0 relative ${isDev ? "border-2 border-dashed border-border" : ""} ${className || ""}`}>
         {isDev && (
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-xs font-semibold text-muted-foreground text-center p-4 select-none">
             <span className="mb-2">Google AdSense Sidebar Slot</span>

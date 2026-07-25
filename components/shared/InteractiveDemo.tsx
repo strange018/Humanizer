@@ -61,7 +61,7 @@ export function InteractiveDemo() {
   }, []);
 
   return (
-    <div className="w-full glass-card rounded-2xl overflow-hidden shadow-2xl border border-border flex flex-col h-[340px] text-left">
+    <div className="w-full glass-card rounded-2xl overflow-hidden shadow-2xl border border-border flex flex-col h-auto min-h-[340px] md:h-[340px] text-left">
       {/* Header bar */}
       <div className="px-4 py-2.5 bg-muted/40 border-b border-border flex items-center justify-between text-xs text-muted-foreground">
         <div className="flex items-center gap-1.5 font-medium">

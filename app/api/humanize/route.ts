@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
             { role: "user", content: text },
           ],
           stream: true,
-          temperature: 0.7,
+          temperature: 1.0,
           max_tokens: 4000,
         });
 
@@ -57,19 +57,24 @@ export async function POST(req: NextRequest) {
         if (save && fullText) {
           const session = await auth();
           if (session?.user?.id) {
-            await prisma.rewrite.create({
-              data: {
-                userId: session.user.id,
-                originalText: text,
-                rewrittenText: fullText,
-                mode,
-                wordCount: countWords(fullText),
-                charCount: countChars(fullText),
-                title: generateTitle(text),
-                originalHumanScore: calculateHumanScore(text),
-                rewrittenHumanScore: calculateHumanScore(fullText),
-              },
-            });
+            try {
+              await prisma.rewrite.create({
+                data: {
+                  userId: session.user.id,
+                  originalText: text,
+                  rewrittenText: fullText,
+                  mode,
+                  wordCount: countWords(fullText),
+                  charCount: countChars(fullText),
+                  title: generateTitle(text),
+                  originalHumanScore: calculateHumanScore(text),
+                  rewrittenHumanScore: calculateHumanScore(fullText),
+                },
+              });
+            } catch (dbErr) {
+              console.error("[HUMANIZE DB SAVE ERROR]", dbErr);
+              // Do not crash the API or stream if the history log fails
+            }
           }
         }
 

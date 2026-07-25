@@ -191,3 +191,25 @@
   border: 2px dashed hsl(var(--border));
   border-radius: var(--radius);
 }
+
+/* Ambient background blobs animation */
+@keyframes pulseGlow {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+    opacity: 0.15;
+  }
+  33% {
+    transform: translate(40px, -40px) scale(1.1);
+    opacity: 0.22;
+  }
+  66% {
+    transform: translate(-30px, 30px) scale(0.9);
+    opacity: 0.12;
+  }
+}
+.animate-blob {
+  animation: pulseGlow 12s ease-in-out infinite;
+}
+.animation-delay-2000 {
+  animation-delay: 2s;
+}

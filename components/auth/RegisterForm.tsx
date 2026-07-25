@@ -58,7 +58,7 @@ export function RegisterForm() {
   };
 
   return (
-    <div className="w-full max-w-md p-8 border border-border/80 bg-card rounded-2xl shadow-lg glow relative">
+    <div className="w-full max-w-md p-8 glass-card rounded-2xl shadow-xl glow relative">
       <div className="text-center mb-6">
         <div className="inline-flex p-3 rounded-xl bg-primary/10 text-primary mb-2">
           <Sparkles className="h-6 w-6" />
@@ -122,7 +122,7 @@ export function RegisterForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2.5 text-sm font-semibold text-primary-foreground bg-primary hover:bg-primary/95 rounded-xl shadow-sm transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+          className="w-full py-2.5 text-sm font-semibold text-primary-foreground bg-primary hover:bg-primary/95 rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1.5 scale-100 hover:scale-[1.01]"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign Up"}
         </button>

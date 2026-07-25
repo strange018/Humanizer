@@ -170,7 +170,7 @@ export function EditorPanel() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Input Panel */}
-        <div className="flex flex-col h-[500px] border border-border bg-card/40 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+        <div className="flex flex-col h-[500px] glass-card rounded-2xl overflow-hidden shadow-md hover:shadow-lg hover:border-primary/25 transition-all duration-300">
           <div className="flex items-center justify-between border-b px-4 py-3 bg-muted/40">
             <span className="text-sm font-semibold text-foreground flex items-center gap-1.5">
               <FileText className="h-4 w-4 text-muted-foreground" />
@@ -215,7 +215,7 @@ export function EditorPanel() {
               <button
                 onClick={() => handleRewrite()}
                 disabled={isLoading || !inputText.trim()}
-                className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary/95 disabled:bg-primary/50 text-primary-foreground font-semibold text-xs rounded-lg shadow-sm shadow-primary/20 cursor-pointer disabled:cursor-not-allowed transition-all"
+                className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary/95 disabled:bg-primary/50 text-primary-foreground font-semibold text-xs rounded-lg shadow-sm shadow-primary/20 cursor-pointer disabled:cursor-not-allowed transition-all scale-100 hover:scale-[1.02] active:scale-95"
               >
                 {isLoading ? (
                   <span className="flex items-center gap-1">
@@ -234,7 +234,7 @@ export function EditorPanel() {
         </div>
 
         {/* Output Panel / Side-by-Side comparison */}
-        <div className="flex flex-col h-[500px] border border-border bg-card/40 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow relative">
+        <div className="flex flex-col h-[500px] glass-card rounded-2xl overflow-hidden shadow-md hover:shadow-lg hover:border-primary/25 transition-all duration-300 relative">
           <div className="flex items-center justify-between border-b px-4 py-3 bg-muted/40">
             <span className="text-sm font-semibold text-foreground flex items-center gap-1.5">
               <Sparkles className="h-4 w-4 text-primary" />

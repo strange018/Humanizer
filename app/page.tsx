@@ -4,7 +4,7 @@ import { AdBanner } from "@/components/ads/AdBanner";
 
 export default function Home() {
   return (
-    <div className="relative isolate overflow-hidden min-h-screen flex flex-col justify-between">
+    <div className="relative isolate overflow-hidden min-h-screen flex flex-col justify-between glow-grid">
       {/* Background radial gradient */}
       <div className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
         <div
@@ -54,7 +54,7 @@ export default function Home() {
         <div className="mx-auto mt-20 max-w-5xl sm:mt-24 lg:mt-32">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {/* Feature 1 */}
-            <div className="relative flex flex-col p-6 rounded-2xl border border-border/80 bg-card/60 glow">
+            <div className="relative flex flex-col p-6 rounded-2xl glass-card glass-card-hover glow">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground mb-4">
                 <Zap className="h-5 w-5" />
               </div>
@@ -65,7 +65,7 @@ export default function Home() {
             </div>
 
             {/* Feature 2 */}
-            <div className="relative flex flex-col p-6 rounded-2xl border border-border/80 bg-card/60 glow">
+            <div className="relative flex flex-col p-6 rounded-2xl glass-card glass-card-hover glow">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground mb-4">
                 <Layers className="h-5 w-5" />
               </div>
@@ -76,7 +76,7 @@ export default function Home() {
             </div>
 
             {/* Feature 3 */}
-            <div className="relative flex flex-col p-6 rounded-2xl border border-border/80 bg-card/60 glow">
+            <div className="relative flex flex-col p-6 rounded-2xl glass-card glass-card-hover glow">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground mb-4">
                 <ShieldCheck className="h-5 w-5" />
               </div>

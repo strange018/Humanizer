@@ -43,7 +43,7 @@ export function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md p-8 border border-border/80 bg-card rounded-2xl shadow-lg glow relative">
+    <div className="w-full max-w-md p-8 glass-card rounded-2xl shadow-xl glow relative">
       <div className="text-center mb-6">
         <div className="inline-flex p-3 rounded-xl bg-primary/10 text-primary mb-2">
           <Sparkles className="h-6 w-6" />
@@ -93,7 +93,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2.5 text-sm font-semibold text-primary-foreground bg-primary hover:bg-primary/95 rounded-xl shadow-sm transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+          className="w-full py-2.5 text-sm font-semibold text-primary-foreground bg-primary hover:bg-primary/95 rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1.5 scale-100 hover:scale-[1.01]"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign In"}
         </button>
@@ -112,7 +112,7 @@ export function LoginForm() {
 
           <button
             onClick={handleGoogleSignIn}
-            className="w-full py-2.5 text-sm font-semibold text-foreground bg-background hover:bg-muted border border-border hover:border-muted-foreground/30 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
+            className="w-full py-2.5 text-sm font-semibold text-foreground bg-card hover:bg-muted border border-border hover:border-muted-foreground/30 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 scale-100 hover:scale-[1.01]"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />

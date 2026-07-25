@@ -28,9 +28,11 @@ export async function POST(req: NextRequest) {
       extractedText = result.value;
     } else if (fileName.endsWith(".pdf")) {
       const buffer = await file.arrayBuffer();
-      const pdfParse = (await import("pdf-parse")) as any;
-      const result = await pdfParse(Buffer.from(buffer));
+      const { PDFParse } = await import("pdf-parse");
+      const parser = new PDFParse({ data: Buffer.from(buffer) });
+      const result = await parser.getText();
       extractedText = result.text;
+      await parser.destroy();
     } else {
       return NextResponse.json(
         { error: "Unsupported file type. Please upload .txt, .docx, or .pdf files." },

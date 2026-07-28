@@ -19,9 +19,10 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts  Account[]
-  sessions  Session[]
-  rewrites  Rewrite[]
+  accounts    Account[]
+  sessions    Session[]
+  rewrites    Rewrite[]
+  tokenUsage  TokenUsage?
 }
 
 model Account {
@@ -79,4 +80,15 @@ model Rewrite {
   @@index([userId])
   @@index([createdAt])
   @@index([mode])
+}
+
+model TokenUsage {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  tokensUsed Int      @default(0)
+  resetAt    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
